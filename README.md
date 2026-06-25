@@ -45,3 +45,6 @@ npx vercel --prod
 
 - 기본 데이터: `public/data/골든래빗 일정.xlsx`
 - 루트의 `골든래빗 일정.xlsx`를 수정한 뒤 `public/data/`에 복사하면 배포 데이터가 갱신됩니다.
+- 구글 시트 CSV 연동도 지원합니다. 기본 연결 주소는 `src/lib/parseExcel.ts`의 `DEFAULT_GOOGLE_SHEET_URL`입니다.
+- 현재 기본 연결 시트는 골든래빗 일정 게시 CSV입니다. 구글 시트 수정 후 저장하고 사이트를 새로고침하면 반영됩니다.
+- 구글 시트를 팀원과 함께 수정만으로 반영하려면 `파일 → 공유 → 웹에 게시` 후 CSV 링크를 사용하세요.

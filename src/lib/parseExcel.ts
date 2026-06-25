@@ -98,11 +98,77 @@ export function parseScheduleExcel(buffer: ArrayBuffer): ScheduleEvent[] {
   })
 }
 
+export function parseScheduleCsv(csvText: string): ScheduleEvent[] {
+  const workbook = XLSX.read(csvText, { type: 'string', raw: false })
+  const sheetName = workbook.SheetNames[0]
+  const sheet = workbook.Sheets[sheetName]
+  const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, { defval: null })
+
+  return rows.map((row) => {
+    const date = parseDate(row[COLUMN_MAP.date])
+    const dateObj = parse(date, 'yyyy-MM-dd', new Date())
+    const weekday = format(dateObj, 'EEEE', { locale: ko })
+    const { time, isAllDay } = parseTime(row[COLUMN_MAP.time])
+    const title = String(row[COLUMN_MAP.title] ?? '').trim()
+    const department = String(row[COLUMN_MAP.department] ?? '-').trim()
+    const completed = parseCompleted(row[COLUMN_MAP.completed])
+    const noteRaw = row[COLUMN_MAP.note]
+    const note = noteRaw === null || noteRaw === undefined || noteRaw === ''
+      ? null
+      : String(noteRaw).trim()
+
+    return {
+      id: createId(date, title),
+      date,
+      weekday,
+      time,
+      isAllDay,
+      title,
+      department,
+      completed,
+      note,
+    }
+  })
+}
+
 export const DEFAULT_DATA_URL = '/data/골든래빗 일정.xlsx'
+export const DEFAULT_GOOGLE_SHEET_URL =
+  'https://docs.google.com/spreadsheets/d/e/2PACX-1vRYjoy5Mt4ABvBu346iPGxrLUZBd-wBYdzaC1hnnW2YzVHtd4z8nrJsVZqOVvmZyH3V2XNMGtf_dqz_/pub?output=csv'
 
 export async function loadDefaultSchedule(): Promise<ScheduleEvent[]> {
   const response = await fetch(DEFAULT_DATA_URL)
   if (!response.ok) throw new Error('기본 일정 파일을 불러올 수 없습니다.')
   const buffer = await response.arrayBuffer()
   return parseScheduleExcel(buffer)
+}
+
+export async function loadGoogleSheetSchedule(
+  csvUrl = DEFAULT_GOOGLE_SHEET_URL,
+): Promise<ScheduleEvent[]> {
+  const response = await fetch(csvUrl)
+  if (!response.ok) {
+    throw new Error('구글 시트 데이터를 불러올 수 없습니다.')
+  }
+
+  const text = await response.text()
+  if (text.includes('Google Sheets: Sign-in') || text.includes('<!DOCTYPE html')) {
+    throw new Error(
+      '구글 시트가 아직 공개 CSV로 게시되지 않았습니다. 웹에 게시 후 다시 시도해 주세요.',
+    )
+  }
+
+  return parseScheduleCsv(text)
+}
+
+export async function loadScheduleData(): Promise<{
+  events: ScheduleEvent[]
+  source: 'google-sheets' | 'excel'
+}> {
+  try {
+    const events = await loadGoogleSheetSchedule()
+    return { events, source: 'google-sheets' }
+  } catch {
+    const events = await loadDefaultSchedule()
+    return { events, source: 'excel' }
+  }
 }

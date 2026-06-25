@@ -8,6 +8,7 @@ import { useScheduleStore } from '@/store/scheduleStore'
 export function FileUploadButton() {
   const inputRef = useRef<HTMLInputElement>(null)
   const setEvents = useScheduleStore((s) => s.setEvents)
+  const setDataSource = useScheduleStore((s) => s.setDataSource)
   const setError = useScheduleStore((s) => s.setError)
   const setCurrentDate = useScheduleStore((s) => s.setCurrentDate)
 
@@ -16,6 +17,7 @@ export function FileUploadButton() {
       const buffer = await file.arrayBuffer()
       const events = parseScheduleExcel(buffer)
       setEvents(events)
+      setDataSource('excel')
       if (events.length > 0) {
         setCurrentDate(parse(events[0].date, 'yyyy-MM-dd', new Date()))
       }

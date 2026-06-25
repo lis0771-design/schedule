@@ -14,6 +14,7 @@ interface ScheduleState {
   events: ScheduleEvent[]
   loading: boolean
   error: string | null
+  dataSource: 'google-sheets' | 'excel'
   currentDate: Date
   view: CalendarView
   selectedEventId: string | null
@@ -22,6 +23,7 @@ interface ScheduleState {
   statusFilter: StatusFilter
   darkMode: boolean
   setEvents: (events: ScheduleEvent[]) => void
+  setDataSource: (source: 'google-sheets' | 'excel') => void
   setLoading: (loading: boolean) => void
   setError: (error: string | null) => void
   setCurrentDate: (date: Date) => void
@@ -62,6 +64,7 @@ export const useScheduleStore = create<ScheduleState>()(
       events: [],
       loading: true,
       error: null,
+      dataSource: 'excel',
       currentDate: new Date(),
       view: 'month',
       selectedEventId: null,
@@ -71,6 +74,7 @@ export const useScheduleStore = create<ScheduleState>()(
       darkMode: false,
 
       setEvents: (events) => set({ events, loading: false, error: null }),
+      setDataSource: (dataSource) => set({ dataSource }),
       setLoading: (loading) => set({ loading }),
       setError: (error) => set({ error, loading: false }),
       setCurrentDate: (currentDate) => set({ currentDate }),

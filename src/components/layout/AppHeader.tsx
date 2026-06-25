@@ -7,6 +7,7 @@ import { useScheduleStore } from '@/store/scheduleStore'
 
 export function AppHeader() {
   const currentDate = useScheduleStore((s) => s.currentDate)
+  const dataSource = useScheduleStore((s) => s.dataSource)
   const darkMode = useScheduleStore((s) => s.darkMode)
   const toggleDarkMode = useScheduleStore((s) => s.toggleDarkMode)
 
@@ -19,7 +20,10 @@ export function AppHeader() {
           </div>
           <div>
             <h1 className="text-lg font-bold leading-tight">골든래빗 일정</h1>
-            <p className="text-xs text-muted-foreground">{formatMonthLabel(currentDate)}</p>
+            <p className="text-xs text-muted-foreground">
+              {formatMonthLabel(currentDate)} ·{' '}
+              {dataSource === 'google-sheets' ? '구글 시트 연동' : '내장 Excel 데이터'}
+            </p>
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">

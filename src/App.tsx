@@ -14,7 +14,7 @@ import { StatusFilter } from '@/components/filters/StatusFilter'
 import { AppHeader } from '@/components/layout/AppHeader'
 import { AppShell } from '@/components/layout/AppShell'
 import { Button } from '@/components/ui/button'
-import { loadDefaultSchedule } from '@/lib/parseExcel'
+import { loadScheduleData } from '@/lib/parseExcel'
 import { useScheduleStore } from '@/store/scheduleStore'
 
 function CalendarViewRouter() {
@@ -36,6 +36,7 @@ function App() {
   const loading = useScheduleStore((s) => s.loading)
   const error = useScheduleStore((s) => s.error)
   const setEvents = useScheduleStore((s) => s.setEvents)
+  const setDataSource = useScheduleStore((s) => s.setDataSource)
   const setLoading = useScheduleStore((s) => s.setLoading)
   const setError = useScheduleStore((s) => s.setError)
   const goToToday = useScheduleStore((s) => s.goToToday)
@@ -44,8 +45,9 @@ function App() {
     void (async () => {
       try {
         setLoading(true)
-        const events = await loadDefaultSchedule()
+        const { events, source } = await loadScheduleData()
         setEvents(events)
+        setDataSource(source)
         if (events.length > 0) {
           const firstDate = parse(events[0].date, 'yyyy-MM-dd', new Date())
           useScheduleStore.getState().setCurrentDate(firstDate)
@@ -54,7 +56,7 @@ function App() {
         setError(err instanceof Error ? err.message : '일정을 불러오지 못했습니다.')
       }
     })()
-  }, [setEvents, setLoading, setError])
+  }, [setDataSource, setEvents, setLoading, setError])
 
   return (
     <AppShell>
